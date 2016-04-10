@@ -44,6 +44,8 @@ class LoginHandler(BaseHandler):
             self.set_secure_cookie("userid", user, httponly=True, expires_days=1)
         else:
             raise tornado.web.HTTPError(403)
+        self.redirect('/')
+        return
 
 class RegistrationHandler(BaseHandler):
     def get(self):
@@ -70,6 +72,8 @@ class RegistrationHandler(BaseHandler):
         packaged2 = (user, hashed, ) #no idea why you have to do this
         cursor = db.cursor()
         cursor.execute("INSERT INTO users (name, hash) VALUES (?, ?)", packaged2)
+        self.redirect('/login')
+        return
 
 
 def make_app():
