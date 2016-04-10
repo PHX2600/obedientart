@@ -78,7 +78,7 @@ def make_app():
         (r"/login", LoginHandler),
         (r"/register", RegistrationHandler),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
-        (r"/images/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/images/css/"}),
+        (r"/images/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/images/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),
     ], cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
     login_url = "/login")
