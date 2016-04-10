@@ -26,7 +26,7 @@ class LoginHandler(BaseHandler):
         user = self.get_argument('user', None)
         password = self.get_argument('password', None)
         if not user or not password:
-            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(401)
 
         global db
         cursor = db.cursor()
@@ -34,14 +34,14 @@ class LoginHandler(BaseHandler):
         cursor.execute("SELECT * from users WHERE name=? LIMIT 1", packaged)
         row = cursor.fetchone()
         if not row:
-            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(402)
 
         username = row[1]
         passhash = row[2]
 
         password = password.encode('utf-8')
-        if passhash == bcrypt.hashpw(password, passhash.encode('utf-8')) and teamname == team:
-            self.set_secure_cookie("userid", teamname, httponly=True, expires_days=1)
+        if passhash == bcrypt.hashpw(password, passhash.encode('utf-8')) and username == user:
+            self.set_secure_cookie("userid", user, httponly=True, expires_days=1)
         else:
             raise tornado.web.HTTPError(403)
 
@@ -53,7 +53,7 @@ class RegistrationHandler(BaseHandler):
         user = self.get_argument('user', None)
         password = self.get_argument('password1', None)
         if not user or not password:
-            raise tornado.web.HTTPError(403)
+            raise tornado.web.HTTPError(401)
 
         global db
         cursor = db.cursor()
@@ -63,7 +63,7 @@ class RegistrationHandler(BaseHandler):
         cursor.execute("SELECT * from users WHERE name=? LIMIT 1", packaged1)
         row = cursor.fetchone()
         if row:
-            raise tornado.web.HTTPError(402)
+            raise tornado.web.HTTPError(403)
 
         password = password.encode('utf-8')
         hashed = bcrypt.hashpw(password, bcrypt.gensalt())
@@ -78,6 +78,7 @@ def make_app():
         (r"/login", LoginHandler),
         (r"/register", RegistrationHandler),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
+        (r"/images/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/images/css/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),
     ], cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
     login_url = "/login")
