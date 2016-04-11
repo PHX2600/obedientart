@@ -2,3 +2,19 @@
     display: inline-block;
     width: auto;
 }
+
+div.nav {
+    text-align: right;
+}
+
+a#login,a#register {
+    font-size: 24pt;
+    font-style: bold;
+}
+
+div#images img {
+    border-style: solid;
+    border-width: 6px;
+    border-color: white;
+    class: col-xs-6 col-md-4;
+}
