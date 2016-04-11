@@ -34,7 +34,7 @@ class LoginHandler(BaseHandler):
         cursor.execute("SELECT * from users WHERE name=? LIMIT 1", packaged)
         row = cursor.fetchone()
         if not row:
-            raise tornado.web.HTTPError(402)
+            raise tornado.web.HTTPError(403)
 
         username = row[1]
         passhash = row[2]
