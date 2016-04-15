@@ -16,11 +16,26 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class MainHandler(BaseHandler):
     def get(self):
-        self.render(self.render(app_dir + "/public/index.html"))
+        self.render(app_dir + "/public/index.html")
+
+class UserHandler(BaseHandler):
+    def get(self, userid):
+
+        global db
+        cursor = db.cursor()
+        packaged = (userid, ) #no idea why you have to do this
+        cursor.execute("SELECT * from users WHERE id=? LIMIT 1", packaged)
+        row = cursor.fetchone()
+        if not row:
+            raise tornado.web.HTTPError(403)
+
+        username = row[1]
+
+        self.render(app_dir + "/public/homepage.html", username=username)
 
 class LoginHandler(BaseHandler):
     def get(self):
-        self.render(self.render(app_dir + "/public/login.html"))
+        self.render(app_dir + "/public/login.html")
 
     def post(self):
         user = self.get_argument('user', None)
@@ -36,6 +51,7 @@ class LoginHandler(BaseHandler):
         if not row:
             raise tornado.web.HTTPError(403)
 
+        userid = row[0]
         username = row[1]
         passhash = row[2]
 
@@ -44,12 +60,12 @@ class LoginHandler(BaseHandler):
             self.set_secure_cookie("userid", user, httponly=True, expires_days=1)
         else:
             raise tornado.web.HTTPError(403)
-        self.redirect('/')
+        self.redirect('/user/' + str(userid))
         return
 
 class RegistrationHandler(BaseHandler):
     def get(self):
-        self.render(self.render(app_dir + "/public/register.html"))
+        self.render(app_dir + "/public/register.html")
 
     def post(self):
         user = self.get_argument('user', None)
@@ -81,6 +97,7 @@ def make_app():
         (r"/", MainHandler),
         (r"/login", LoginHandler),
         (r"/register", RegistrationHandler),
+        (r"/user/([^/]+)", UserHandler),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
         (r"/images/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/images/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),
