@@ -31,11 +31,17 @@ class UserHandler(BaseHandler):
         self.render(app_dir + "/public/homepage.html", username=user.name)
 
 class ImageHandler(BaseHandler):
+    @tornado.web.authenticated
     def get(self):
         global db
         imageid = self.get_argument('imageid', None)
         image = db.get("SELECT * from pics WHERE id=%s LIMIT 1", imageid)
         if not image:
+            raise tornado.web.HTTPError(403)
+
+        #Authorization check
+        userid = self.get_current_user()
+        if userid != str(image.user_id):
             raise tornado.web.HTTPError(403)
 
         file = open(app_dir + "/public/images/" + image.file_path, 'r')
@@ -48,12 +54,7 @@ class ImageHandler(BaseHandler):
         if not imageinfo or not private:
             raise tornado.web.HTTPError(401)
 
-        username = self.get_current_user()
-        global db
-        row = db.get("SELECT * from users WHERE name=%s LIMIT 1", username)
-        if not row:
-            raise tornado.web.HTTPError(403)
-        userid = row.id
+        userid = self.get_current_user()
 
         file_path = imageinfo['filename']
         basename = os.path.basename(file_path)
@@ -66,7 +67,7 @@ class ImageHandler(BaseHandler):
         db.execute("INSERT INTO pics (id, file_path, private, user_id) VALUES (%s, %s, %s, %s)", imageid, file_path, is_private, userid)
         self.write(imageid)
 
-        #Save file to the filesystem
+        #Save file to the filesystem, if it doesn't already exist
         if not os.path.exists(basename):
             fh = open(app_dir + "/public/images/" + basename, 'w')
             fh.write(imageinfo['body'])
@@ -89,7 +90,7 @@ class LoginHandler(BaseHandler):
             raise tornado.web.HTTPError(403)
 
         if bcrypt.hashpw(password.encode('utf-8'), user.hash.encode('utf-8')) == user.hash:
-            self.set_secure_cookie("userid", user.name, httponly=True, expires_days=1)
+            self.set_secure_cookie("userid", str(user.id), httponly=True, expires_days=1)
         else:
             raise tornado.web.HTTPError(403)
 
