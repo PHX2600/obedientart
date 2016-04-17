@@ -3,7 +3,6 @@ import tornado.web
 import os
 import sqlite3
 import bcrypt
-import MySQLdb.constants
 import tornado_mysql
 import ConfigParser
 import torndb
@@ -78,26 +77,24 @@ class LoginHandler(BaseHandler):
         self.render(app_dir + "/public/login.html")
 
     def post(self):
-        user = self.get_argument('user', None)
+        username = self.get_argument('user', None)
         password = self.get_argument('password', None)
-        if not user or not password:
+
+        if not username or not password:
             raise tornado.web.HTTPError(401)
 
         global db
-        row = db.get("SELECT * from users WHERE name=%s LIMIT 1", user)
-        if not row:
+        user = db.get("SELECT * from users WHERE name=%s LIMIT 1", username)
+
+        if not user:
             raise tornado.web.HTTPError(403)
 
-        userid = row.id
-        username = row.name
-        passhash = row.hash
-
-        password = password.encode('utf-8')
-        if passhash == bcrypt.hashpw(password, passhash.encode('utf-8')) and username == user:
-            self.set_secure_cookie("userid", user, httponly=True, expires_days=1)
+        if bcrypt.hashpw(password.encode('utf-8'), user.hash.encode('utf-8')) == user.hash:
+            self.set_secure_cookie("userid", user.name, httponly=True, expires_days=1)
         else:
             raise tornado.web.HTTPError(403)
-        self.redirect('/user/' + str(userid))
+
+        self.redirect('/user/' + str(user.id))
         return
 
 class RegistrationHandler(BaseHandler):
