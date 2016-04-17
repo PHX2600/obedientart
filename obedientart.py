@@ -23,7 +23,6 @@ class MainHandler(BaseHandler):
 
 class UserHandler(BaseHandler):
     def get(self, userid):
-
         global db
         user = db.get("SELECT * from users WHERE id=%s LIMIT 1", userid)
         if not user:
@@ -64,7 +63,7 @@ class ImageHandler(BaseHandler):
         if private == "true":
             is_private = 1
         imageid = str(uuid.uuid4())
-        db.execute("INSERT INTO pics (id, file_path, private) VALUES (%s, %s, %s)", imageid, file_path, is_private)
+        db.execute("INSERT INTO pics (id, file_path, private, user_id) VALUES (%s, %s, %s, %s)", imageid, file_path, is_private, userid)
         self.write(imageid)
 
         #Save file to the filesystem
