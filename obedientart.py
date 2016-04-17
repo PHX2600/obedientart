@@ -7,6 +7,7 @@ import tornado_mysql
 import ConfigParser
 import torndb
 import uuid
+import json
 
 app_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -51,7 +52,7 @@ class ImageHandler(BaseHandler):
     def post(self):
         imageinfo = self.request.files['image'][0]
         private = self.get_argument('private', None)
-        if not imageinfo or not private:
+        if not imageinfo:
             raise tornado.web.HTTPError(401)
 
         userid = self.get_current_user()
@@ -61,7 +62,7 @@ class ImageHandler(BaseHandler):
 
         #insert the file record into the database
         is_private = 0
-        if private == "on":
+        if not private or private == "on":
             is_private = 1
         imageid = str(uuid.uuid4())
         db.execute("INSERT INTO pics (id, file_path, private, user_id) VALUES (%s, %s, %s, %s)", imageid, file_path, is_private, userid)
@@ -96,6 +97,23 @@ class LoginHandler(BaseHandler):
 
         self.redirect('/user/' + str(user.id))
         return
+
+class ListFilesHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        queried_user_id = self.get_argument('userid', None)
+        if not queried_user_id:
+            raise tornado.web.HTTPError(401)
+
+        userid = self.get_current_user()
+
+        #Scrub out private file ids for security
+        if queried_user_id != userid:
+            images = db.query("SELECT IF (private = 1, NULL, id) AS id, file_path, private from pics WHERE user_id=%s", queried_user_id)
+        else:
+            images = db.query("SELECT * from pics WHERE user_id=%s", queried_user_id)
+
+        self.write(json.dumps(images))
 
 class RegistrationHandler(BaseHandler):
     def get(self):
@@ -137,6 +155,7 @@ def make_app():
         (r"/register", RegistrationHandler),
         (r"/user/([^/]+)", UserHandler),
         (r"/images", ImageHandler),
+        (r"/listfiles", ListFilesHandler),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),
     ], cookie_secret=secure_cookie_key,
