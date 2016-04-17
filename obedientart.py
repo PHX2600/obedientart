@@ -61,7 +61,7 @@ class ImageHandler(BaseHandler):
 
         #insert the file record into the database
         is_private = 0
-        if private == "true":
+        if private == "on":
             is_private = 1
         imageid = str(uuid.uuid4())
         db.execute("INSERT INTO pics (id, file_path, private, user_id) VALUES (%s, %s, %s, %s)", imageid, file_path, is_private, userid)
