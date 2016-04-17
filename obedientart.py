@@ -25,16 +25,11 @@ class UserHandler(BaseHandler):
     def get(self, userid):
 
         global db
-        cursor = db.cursor()
-        packaged = (userid, ) #no idea why you have to do this
-        cursor.execute("SELECT * from users WHERE id=? LIMIT 1", packaged)
-        row = cursor.fetchone()
-        if not row:
+        user = db.get("SELECT * from users WHERE id=%s LIMIT 1", userid)
+        if not user:
             raise tornado.web.HTTPError(403)
 
-        username = row[1]
-
-        self.render(app_dir + "/public/homepage.html", username=username)
+        self.render(app_dir + "/public/homepage.html", username=user.name)
 
 class LoginHandler(BaseHandler):
     def get(self):
@@ -47,16 +42,13 @@ class LoginHandler(BaseHandler):
             raise tornado.web.HTTPError(401)
 
         global db
-        cursor = db.cursor()
-        packaged = (user, ) #no idea why you have to do this
-        cursor.execute("SELECT * from users WHERE name=? LIMIT 1", packaged)
-        row = cursor.fetchone()
+        row = db.get("SELECT * from users WHERE name=%s LIMIT 1", user)
         if not row:
             raise tornado.web.HTTPError(403)
 
-        userid = row[0]
-        username = row[1]
-        passhash = row[2]
+        userid = row.id
+        username = row.name
+        passhash = row.hash
 
         password = password.encode('utf-8')
         if passhash == bcrypt.hashpw(password, passhash.encode('utf-8')) and username == user:
@@ -77,20 +69,15 @@ class RegistrationHandler(BaseHandler):
             raise tornado.web.HTTPError(401)
 
         global db
-        cursor = db.cursor()
-        packaged1 = (user, ) #no idea why you have to do this
-
         #Does the user already exist?
-        cursor.execute("SELECT * from users WHERE name=? LIMIT 1", packaged1)
-        row = cursor.fetchone()
-        if row:
+        rows = db.get("SELECT * from users WHERE name=%s LIMIT 1", user)
+        if rows:
             raise tornado.web.HTTPError(403)
 
         password = password.encode('utf-8')
         hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-        packaged2 = (user, hashed, ) #no idea why you have to do this
-        cursor = db.cursor()
-        cursor.execute("INSERT INTO users (name, hash) VALUES (?, ?)", packaged2)
+
+        db.execute("INSERT INTO users (name, hash) VALUES (%s, %s)", user, hashed)
         self.redirect('/login')
         return
 
