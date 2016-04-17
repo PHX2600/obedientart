@@ -63,3 +63,4 @@ target/
 
 database.db
 settings.cfg
+public/images/*

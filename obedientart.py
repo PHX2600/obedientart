@@ -7,6 +7,7 @@ import MySQLdb.constants
 import tornado_mysql
 import ConfigParser
 import torndb
+import uuid
 
 app_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -30,6 +31,47 @@ class UserHandler(BaseHandler):
             raise tornado.web.HTTPError(403)
 
         self.render(app_dir + "/public/homepage.html", username=user.name)
+
+class ImageHandler(BaseHandler):
+    def get(self):
+        global db
+        imageid = self.get_argument('imageid', None)
+        image = db.get("SELECT * from pics WHERE id=%s LIMIT 1", imageid)
+        if not image:
+            raise tornado.web.HTTPError(403)
+
+        file = open(app_dir + "/public/images/" + image.file_path, 'r')
+        self.write(file.read())
+
+    @tornado.web.authenticated
+    def post(self):
+        imageinfo = self.request.files['image'][0]
+        private = self.get_argument('private', None)
+        if not imageinfo or not private:
+            raise tornado.web.HTTPError(401)
+
+        username = self.get_current_user()
+        global db
+        row = db.get("SELECT * from users WHERE name=%s LIMIT 1", username)
+        if not row:
+            raise tornado.web.HTTPError(403)
+        userid = row.id
+
+        file_path = imageinfo['filename']
+        basename = os.path.basename(file_path)
+
+        #insert the file record into the database
+        is_private = 0
+        if private == "true":
+            is_private = 1
+        imageid = str(uuid.uuid4())
+        db.execute("INSERT INTO pics (id, file_path, private) VALUES (%s, %s, %s)", imageid, file_path, is_private)
+        self.write(imageid)
+
+        #Save file to the filesystem
+        if not os.path.exists(basename):
+            fh = open(app_dir + "/public/images/" + basename, 'w')
+            fh.write(imageinfo['body'])
 
 class LoginHandler(BaseHandler):
     def get(self):
@@ -81,7 +123,6 @@ class RegistrationHandler(BaseHandler):
         self.redirect('/login')
         return
 
-
 def make_app():
 
     config = ConfigParser.RawConfigParser()
@@ -98,8 +139,8 @@ def make_app():
         (r"/login", LoginHandler),
         (r"/register", RegistrationHandler),
         (r"/user/([^/]+)", UserHandler),
+        (r"/images", ImageHandler),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
-        (r"/images/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/images/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),
     ], cookie_secret=secure_cookie_key,
     login_url = "/login")

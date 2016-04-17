@@ -12,9 +12,9 @@ CREATE TABLE users(
 
 DROP TABLE IF EXISTS pics;
 CREATE TABLE pics(
-    id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(20) NOT NULL UNIQUE,
-    file_path VARCHAR(100) NOT NULL
+    id VARCHAR(100) PRIMARY KEY NOT NULL,
+    file_path VARCHAR(100) NOT NULL,
+    private BOOL NOT NULL
 );
 
 -- TODO put in admin user

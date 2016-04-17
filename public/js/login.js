@@ -2,7 +2,7 @@ $(document).ready(function() {
 
   $("#loginbutton").click(function(event){
 
-    event.preventDefault();
+    //event.preventDefault();
 
     jQuery.post({
       url: "/login",
