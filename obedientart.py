@@ -3,7 +3,6 @@ import tornado.web
 import os
 import sqlite3
 import bcrypt
-import MySQLdb.constants
 import tornado_mysql
 import ConfigParser
 import torndb
