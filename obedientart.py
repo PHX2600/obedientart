@@ -3,9 +3,12 @@ import tornado.web
 import os
 import sqlite3
 import bcrypt
+import MySQLdb.constants
+import tornado_mysql
+import ConfigParser
+import torndb
 
 app_dir = os.path.dirname(os.path.realpath(__file__))
-db = sqlite3.connect(app_dir + '/../database.db')
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
@@ -93,6 +96,16 @@ class RegistrationHandler(BaseHandler):
 
 
 def make_app():
+
+    config = ConfigParser.RawConfigParser()
+    config.read(app_dir + '/settings.cfg')
+    secure_cookie_key = config.get('server', 'secure_cookie_key')
+    db_url = config.get('database', 'url')
+    db_username = config.get('database', 'username')
+    db_password = config.get('database', 'password')
+    global db
+    db = torndb.Connection(db_url, "obedientart", user=db_username, password=db_password)
+
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/login", LoginHandler),
@@ -101,7 +114,7 @@ def make_app():
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
         (r"/images/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/images/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),
-    ], cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
+    ], cookie_secret=secure_cookie_key,
     login_url = "/login")
 
 if __name__ == "__main__":

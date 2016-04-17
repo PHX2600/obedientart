@@ -1,5 +1,7 @@
 -- To reload the tables:
---   sqlite3 database.db < schema.sql
+--   mysql --user=[USER] --password=[PASS] --database=obedientart < schema.sql
+-- To make the DB:
+--   echo "CREATE DATABSE obedientart" | mysql -u root -p 
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users(
@@ -20,8 +22,6 @@ CREATE TABLE flags (
     id INTEGER PRIMARY KEY,
     value TEXT(500)
 );
-
-
 
 --TODO replace in prod
 INSERT into flags (value) VALUES ('congrats flag1');
