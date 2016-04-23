@@ -29,7 +29,13 @@ class UserHandler(BaseHandler):
         if not user:
             raise tornado.web.HTTPError(403)
 
-        self.render(app_dir + "/public/homepage.html", username=user.name)
+        curr_userid = self.get_current_user()
+
+        images = ['/images?imageid=' + x['id']
+                for x in json.loads(FileHelpers.get_images(curr_userid, userid)) if x['id'] != None]
+
+        self.render(app_dir + "/public/homepage.html",
+            username=user.name, images=images)
 
 class ImageHandler(BaseHandler):
     @tornado.web.authenticated
@@ -96,6 +102,16 @@ class LoginHandler(BaseHandler):
         self.redirect('/user/' + str(user.id))
         return
 
+class FileHelpers(object):
+    @staticmethod
+    def get_images(userid, queried_user_id):
+        #Scrub out private file ids for security
+        if queried_user_id != userid:
+            images = db.query("SELECT IF (private = 1, NULL, id) AS id, file_path, private from pics WHERE user_id=%s", queried_user_id)
+        else:
+            images = db.query("SELECT * from pics WHERE user_id=%s", queried_user_id)
+        return json.dumps(images)
+
 class ListFilesHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
@@ -105,13 +121,9 @@ class ListFilesHandler(BaseHandler):
 
         userid = self.get_current_user()
 
-        #Scrub out private file ids for security
-        if queried_user_id != userid:
-            images = db.query("SELECT IF (private = 1, NULL, id) AS id, file_path, private from pics WHERE user_id=%s", queried_user_id)
-        else:
-            images = db.query("SELECT * from pics WHERE user_id=%s", queried_user_id)
+        images = FileHelpers.get_images(userid, queried_user_id)
 
-        self.write(json.dumps(images))
+        self.write(images)
 
 class RegistrationHandler(BaseHandler):
     def get(self):

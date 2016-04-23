@@ -32,5 +32,12 @@
 
   </div>
 
+  <div>
+      {% for img in images %}
+      <img class="img-responsive col-lg-3 col-sm-6 col-xs-12 " src="{{ escape(img) }}"/>
+      {% end %}
+  </div>
+
+
 </body>
 </html>
