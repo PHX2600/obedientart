@@ -40,11 +40,6 @@ class ImageHandler(BaseHandler):
         if not image:
             raise tornado.web.HTTPError(403)
 
-        #Authorization check
-        userid = self.get_current_user()
-        if userid != str(image.user_id):
-            raise tornado.web.HTTPError(403)
-
         file = open(app_dir + "/public/images/" + image.file_path, 'r')
         self.write(file.read())
 
