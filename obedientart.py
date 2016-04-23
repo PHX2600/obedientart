@@ -50,8 +50,8 @@ class ImageHandler(BaseHandler):
         if not imageinfo:
             raise tornado.web.HTTPError(401)
 
-        if len(imageinfo['body']) > 25000:
-            raise tornado.web.HTTPError(403, reason="File size too big! Images must be smaller than 25k")
+        if len(imageinfo['body']) > 250000:
+            raise tornado.web.HTTPError(403, reason="File size too big! Images must be smaller than 250k")
 
         userid = self.get_current_user()
 
