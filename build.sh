@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt-get install -y python python-dev python-virtualenv mysql-server-5.6 libmysqlclient-dev libffi
+sudo apt-get install -y python python-dev python-virtualenv mysql-server-5.6 libmysqlclient-dev libffi-dev
 
 venv=$HOME/obedientart_virtualenv
 
