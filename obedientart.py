@@ -30,12 +30,13 @@ class UserHandler(BaseHandler):
             raise tornado.web.HTTPError(403)
 
         curr_userid = self.get_current_user()
+        is_uploader = True if curr_userid == userid else False
 
         images = ['/images?imageid=' + x['id']
                 for x in json.loads(FileHelpers.get_images(curr_userid, userid)) if x['id'] != None]
 
         self.render(app_dir + "/public/homepage.html",
-            username=user.name, images=images)
+            username=user.name, images=images, is_uploader=is_uploader)
 
 class ImageHandler(BaseHandler):
     @tornado.web.authenticated

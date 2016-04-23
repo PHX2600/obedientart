@@ -21,12 +21,14 @@
       <h1>{{ username }}'s Homepage</h1>
 
       <br><br>
+      {% if is_uploader %}
       Upload a new file:
       <form method="post" action="/images" enctype="multipart/form-data">
         <input type="file" name="image" accept="image/*">
         <input type="checkbox" name="private">Private
         <input type="submit">
       </form>
+      {% end %}
 
     </div>
 
