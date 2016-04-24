@@ -1,0 +1,2 @@
+bin/phantomjs xxs-hehe.js "http://127.0.0.1:8888/user/1" "2|1:0|10:1461457063|6:userid|4:MQ==|0d695b876f4e089026f0a4d38e0e162034487d364f51c2e539f0c68d4a6a8515"
+
