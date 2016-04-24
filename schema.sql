@@ -31,12 +31,10 @@ INSERT INTO `pics` VALUES ('2c4045f7-f6d9-4e21-a515-a223b966741d',5,'north_korea
 /*!40000 ALTER TABLE `pics` ENABLE KEYS */;
 UNLOCK TABLES;
 
--- TODO put in admin user
--- INSERT into users (user, hash) VALUES ('admin', '$2a$12$uW7DWD3n497ZlVA1gJiuhOftfIudF/nINoiQKwm2/3rnvjuCg6Ldy');
-
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'kjon_is_superb','$2b$12$xGu5wW8WPJN9/nd1EcXs8OvFztss34gTUE7b1b7jCFnrzGMvhYv/K'),
+INSERT INTO `users` VALUES (1,'admin','$2a$12$uW7DWD3n497ZlVA1gJiuhOftfIudF/nINoiQKwm2/3rnvjuCg6Ldy'),
+                           (2,'kjon_is_superb','$2b$12$xGu5wW8WPJN9/nd1EcXs8OvFztss34gTUE7b1b7jCFnrzGMvhYv/K'),
                            (3,'the-real-kay-jay-un','$2b$12$jyesbIgwpyep82RbvHemWuOeK3LenhJlBHEE3NRYiADUQRtHADcg2'),
                            (4,'luv2un','$2b$12$C2ksv3u8crudXyXUUHMcdubaucd1C9QCPABSivE8.UvYTPCjb6YF2'),
                            (5,'unununium','$2b$12$Ikr7hbEAYBGM0hygrW87oeyWaYh5jnr3MnqqLgSV8eTBc86wizznK');
