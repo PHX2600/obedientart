@@ -3,18 +3,10 @@
     width: auto;
 }
 
-div.nav {
-    text-align: right;
+.navbar-right {
+    margin-right: 0;
 }
 
-a#login,a#register {
-    font-size: 24pt;
-    font-style: bold;
-}
-
-div#images img {
-    border-style: solid;
-    border-width: 6px;
-    border-color: white;
-    class: col-xs-6 col-md-4;
+.image-list img {
+    margin-bottom: 15px;
 }
