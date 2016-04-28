@@ -1,7 +1,7 @@
 -- To reload the tables:
 --   mysql --user=[USER] --password=[PASS] --database=obedientart < schema.sql
 -- To make the DB:
---   echo "CREATE DATABSE obedientart" | mysql -u root -p
+--   echo "CREATE DATABASE obedientart" | mysql -u root -p
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users(
