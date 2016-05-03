@@ -8,6 +8,7 @@ import ConfigParser
 import torndb
 import uuid
 import json
+import time
 
 app_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,14 +33,32 @@ class UserHandler(BaseHandler):
         curr_userid = self.get_current_user()
         is_uploader = True if curr_userid == userid else False
 
-        images = ['/images?imageid=' + x['id']
+        images = [x['id']
                 for x in json.loads(FileHelpers.get_images(curr_userid, userid)) if x['id'] != None]
 
         self.render(app_dir + "/public/homepage.html",
             username=user.name, images=images, is_uploader=is_uploader)
 
+    def post(self):
+        contents = self.get_argument('contents', None)
+        imageid = self.get_argument('imageid', None)
+        if not contents or not imageid:
+            raise tornado.web.HTTPError(401)
+
+        image = db.get("SELECT * from pics WHERE id=%s LIMIT 1", imageid)
+        if not image:
+            raise tornado.web.HTTPError(404)
+
+        comments = db.query("SELECT * from comments WHERE pic_id=%s ORDER BY time_stamp ASC", imageid)
+        if comments:
+            if len(comments) > 10:
+                old_id = comments[0].id
+                db.execute("DELETE FROM comments WHERE id = %s", old_id)
+
+        db.execute("INSERT INTO comments (pic_id, time_stamp, contents) VALUES (%s, %s, %s)", imageid, time.time(), contents)
+        self.redirect("/user/" + str(image.user_id))
+
 class ImageHandler(BaseHandler):
-    @tornado.web.authenticated
     def get(self):
         global db
         imageid = self.get_argument('imageid', None)
@@ -77,6 +96,20 @@ class ImageHandler(BaseHandler):
         if not os.path.exists(basename):
             fh = open(app_dir + "/public/images/" + basename, 'w')
             fh.write(imageinfo['body'])
+
+class CommentHandler(BaseHandler):
+    def get(self):
+        imageid = self.get_argument('imageid', None)
+        if not imageid:
+            raise tornado.web.HTTPError(401)
+        comments = db.query("SELECT * from comments WHERE pic_id=%s ORDER BY time_stamp DESC LIMIT 10", imageid)
+        if comments:
+            self.write('<table>')
+            for sublist in comments:
+                self.write('  <tr>')
+                self.write('    <td>' + sublist.contents)
+                self.write('  </tr>')
+            self.write('</table>')
 
 class LoginHandler(BaseHandler):
     def get(self):
@@ -165,7 +198,9 @@ def make_app():
         (r"/login", LoginHandler),
         (r"/register", RegistrationHandler),
         (r"/user/([^/]+)", UserHandler),
+        (r"/user", UserHandler),
         (r"/images", ImageHandler),
+        (r"/comments", CommentHandler),
         (r"/listfiles", ListFilesHandler),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/css/"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": app_dir + "/public/js/"}),

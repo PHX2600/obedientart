@@ -6,8 +6,8 @@ Set Up
 
 ### Install prerequisites
 
-    sudo apt install mysql-server python-mysqldb
-    sudp pip install -r requirements.txt
+    sudo apt install mysql-server python-mysqldb libffi-dev
+    sudo pip install -r requirements.txt
 
 ### Setup the database
 

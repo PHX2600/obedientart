@@ -18,6 +18,14 @@ CREATE TABLE pics(
     private BOOL NOT NULL
 );
 
+DROP TABLE IF EXISTS comments;
+CREATE TABLE comments(
+    id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    pic_id VARCHAR(100) NOT NULL,
+    time_stamp INTEGER NOT NULL,
+    contents VARCHAR(140) NOT NULL
+);
+
 LOCK TABLES `pics` WRITE;
 /*!40000 ALTER TABLE `pics` DISABLE KEYS */;
 INSERT INTO `pics` VALUES ('2c4045f7-f6d9-4e21-a515-a223b966741d',5,'north_korea_vs_south_korea_by_andyandreutzza-d610b1c.jpg',0),

@@ -63,7 +63,21 @@
   <div class="image-list row">
     {% for img in images %}
       <div class="col-md-3 col-sm-4 col-xs-6">
-        <img src="{{ escape(img) }}" width="100%" class="img-responsive img-thumbnail">
+        <img src="/images?imageid={{ escape(img) }}" width="100%" class="img-responsive img-thumbnail">
+        <br><br>Comments<br>
+        <div id="{{ escape(img) }}" class="panel panel-default form-inline"></div>
+        <script>$('#{{ escape(img) }}').load("/comments?imageid={{ escape(img) }}");</script>
+        <form method="post" action="/user" class="panel panel-default form-inline">
+          <div class="panel-heading">Comment on this photo:</div>
+          <div class="panel-body">
+            <div class="form-group">
+              <input type="textarea" name="imageid" class="hidden" value="{{ escape(img) }}">
+              <input type="textarea" name="contents">
+            </div>
+            <hr>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Comment</button>
+          </div>
+        </form>
       </div>
     {% end %}
   </div>
